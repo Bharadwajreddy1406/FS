@@ -55,8 +55,100 @@
 // Shelf 5: [7]
 
 
-
+import java.util.*;
+class Node{
+    int data;
+    Node left, right;
+    Node(int data){
+        this.data = data;
+        this.left = this.right = null;
+    }
+}
 
 public class VerticalTreeTraversal {
     
+    public static Node buildTree(String[] nodes){
+        Node root = new Node(Integer.parseInt(nodes[0]));
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+        int i = 1;
+        while(i < nodes.length){
+            Node curr = queue.poll();
+            if(!nodes[i].equals("-1")){
+                curr.left = new Node(Integer.parseInt(nodes[i]));
+                queue.add(curr.left);
+            }
+            i++;
+            if(i < nodes.length && !nodes[i].equals("-1")){
+                curr.right = new Node(Integer.parseInt(nodes[i]));
+                queue.add(curr.right);
+            }
+            i++;
+        }
+        return root;
+    }
+
+    public static List<List<Integer>> verticalTraversal(Node root) {
+        List<List<Integer>> result = new ArrayList<>();
+        if(root == null) return result;
+        
+        Map<Integer, List<int[]>> map = new TreeMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        Queue<Integer> cols = new LinkedList<>();
+        queue.add(root);
+        cols.add(0);
+        
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            Map<Integer, List<Integer>> temp = new TreeMap<>();
+            for(int i=0; i<size; i++){
+                Node curr = queue.poll();
+                int col = cols.poll();
+                if(!temp.containsKey(col)){
+                    temp.put(col, new ArrayList<>());
+                }
+                temp.get(col).add(curr.data);
+                
+                if(curr.left != null){
+                    queue.add(curr.left);
+                    cols.add(col-1);
+                }
+                if(curr.right != null){
+                    queue.add(curr.right);
+                    cols.add(col+1);
+                }
+            }
+            for(int key: temp.keySet()){
+                if(!map.containsKey(key)){
+                    map.put(key, new ArrayList<>());
+                }
+                List<Integer> list = temp.get(key);
+                Collections.sort(list);
+                for(int val: list){
+                    map.get(key).add(new int[]{val, key});
+                }
+            }
+        }
+        
+        for(int key: map.keySet()){
+            List<int[]> list = map.get(key);
+            List<Integer> res = new ArrayList<>();
+            for(int[] val: list){
+                res.add(val[0]);
+            }
+            result.add(res);
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        
+        Scanner sc = new Scanner(System.in);
+        String[] nodes = sc.nextLine().split(" ");
+        Node root = buildTree(nodes);
+        
+        List<List<Integer>> result = verticalTraversal(root);
+        System.out.println(result);
+    }
+
 }
